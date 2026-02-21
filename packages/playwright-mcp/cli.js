@@ -19,6 +19,19 @@ const { program } = require('playwright-core/lib/utilsBundle');
 const { decorateMCPCommand } = require('playwright/lib/mcp/program');
 
 const packageJSON = require('./package.json');
+
+// Enable devtools capability by default so video recording tools
+// (browser_start_video / browser_stop_video) are always available.
+const args = process.argv.slice();
+if (!args.some(a => a.startsWith('--caps'))) {
+  args.push('--caps=devtools');
+} else {
+  const idx = args.findIndex(a => a.startsWith('--caps='));
+  if (idx !== -1 && !args[idx].includes('devtools')) {
+    args[idx] += ',devtools';
+  }
+}
+
 const p = program.version('Version ' + packageJSON.version).name('Playwright MCP');
 decorateMCPCommand(p, packageJSON.version)
-void program.parseAsync(process.argv);
+void program.parseAsync(args);
